@@ -1,0 +1,67 @@
+<h1 align = "center">websocket_client</h1>
+<button onclick="svc_connectPlatform()"> connect</button>
+</br>
+</br>
+<input type="text" name="ID1" id="text1"" placeholder="input message">
+<button onclick="svc_send(text1.value)"> send</button>
+<p>receive message:</p>
+<input type="text" name="ID2" id="text2" value="" placeholder="receive message">
+</br>
+</br>
+<button onclick="svc_onClose()"> disconnect server</button>
+
+<script>
+
+    function svc_connectPlatform() {
+        //alert("");
+        var wsServer = 'ws://192.168.31.222:8888/';
+        try {
+            svc_websocket = new WebSocket(wsServer);
+        } catch (evt) {
+			alert("connect failure!");
+            console.log("new WebSocket error:" + evt.data);
+            svc_websocket = null;
+            if (typeof(connCb) != "undefined" && connCb != null)
+                connCb("-1", "connect error!");
+			
+            return;
+        }
+        //alert("");
+        svc_websocket.onopen = svc_onOpen;
+        svc_websocket.onclose = svc_onClose;
+        svc_websocket.onmessage = svc_onMessage;
+        svc_websocket.onerror = svc_onError;
+    }
+
+
+    function svc_onOpen(evt) {
+        console.log("Connected to WebSocket server.");
+    }
+
+
+    function svc_onClose(evt) {
+        console.log("Disconnected");
+		svc_websocket.close();
+    }
+
+
+    function svc_onMessage(evt) {
+        console.log('Retrieved data from server: ' + evt.data);
+		var text= evt.data;
+		document.getElementById("text2").value = text;
+    }
+
+
+    function svc_onError(evt) {
+        console.log('Error occured: ' + evt.data);
+    }
+
+
+    function svc_send(msg) {
+        if (svc_websocket.readyState == WebSocket.OPEN) {
+            svc_websocket.send(msg);
+        } else {
+            console.log("send failed. websocket not open. please check.");
+        }
+    }
+</script>
